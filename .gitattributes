@@ -1,0 +1,12 @@
+*.zip filter=lfs diff=lfs merge=lfs -text
+*.jar filter=lfs diff=lfs merge=lfs -text
+/tools/7z filter=lfs diff=lfs merge=lfs -text
+/tools/7z.so filter=lfs diff=lfs merge=lfs -text
+/tools/aapt filter=lfs diff=lfs merge=lfs -text
+/tools/adb filter=lfs diff=lfs merge=lfs -text
+/tools/adb64 filter=lfs diff=lfs merge=lfs -text
+/tools/zipalign filter=lfs diff=lfs merge=lfs -text
+/tools/boot/AIK/** filter=lfs diff=lfs merge=lfs -text
+/tools/signapk/zipadjust filter=lfs diff=lfs merge=lfs -text
+/tools/updater/META-INF/com/google/android/update-binary filter=lfs diff=lfs merge=lfs -text
+/tools/updater/META-INF-DAT/META-INF/com/google/android/update-binary filter=lfs diff=lfs merge=lfs -text
