@@ -1785,9 +1785,6 @@ debinstall() {
 			${usesudo2}apt-get -qq update
 			${usesudo2}apt-get -qq -y install $debpkg
 			rm -rf depinstall
-			if [[ ! $(echo $debpkg | grep build-essential) = "" ]]; then
-				touch $tools/depbuild
-			fi
 			debpkg=""
 			cd $base
 			exec ./superr
@@ -3560,12 +3557,12 @@ extract_new() {
 		banner
 		echo "$bluet$t_extract_convert_chunk$normal"
 		if [[ $(echo "$romchunk" | grep "sparsechunk") != "" ]]; then
-			$tools/simg2img${cyg} *chunk* system.img.raw
+			$simg2img *chunk* system.img.raw
 			offset=$(LANG=C grep -aobP -m1 '\x53\xEF' system.img.raw | head -1 | gawk '{print $1 - 1080}')
 			( dd if=system.img.raw of=system.img ibs=$offset skip=1 2>&1 ) > $logs/main.log
 			rm -rf system.img.raw
 		else
-			$tools/simg2img${cyg} *chunk* system.img
+			$simg2img *chunk* system.img
 		fi
 		rm -rf *chunk*
 		romimg="system.img"
@@ -3920,7 +3917,7 @@ findimgsize() {
 			if [[ -f $whatimg.img ]]; then
 				banner
 				echo "$bluet$t_extract_sparse_convert$normal"
-				$tools/simg2img${cyg} $whatimg.img $whatimg.img-2 2>/dev/null
+				$simg2img $whatimg.img $whatimg.img-2 2>/dev/null
 				if [[ ! -s $whatimg.img-2 ]]; then
 					rm -rf $whatimg.img-2
 				else
@@ -4332,7 +4329,7 @@ imgextract() {
 	myuser=$(echo "$(whoami | gawk '{ print $1 }')")
 	banner
 	echo "$bluet$t_extract_sparse_convert$normal"
-	$tools/simg2img${cyg} ${extractimg}.img ${extractimg}.img-2 2>/dev/null
+	$simg2img ${extractimg}.img ${extractimg}.img-2 2>/dev/null
 	if [[ ! -s ${extractimg}.img-2 ]]; then
 		rm -rf ${extractimg}.img-2
 	else
@@ -4388,8 +4385,8 @@ imgextract() {
 				cd output
 				find . -maxdepth 1 | while read line; do
 					line2=$(echo "$line" | sed 's/^\.//')
-					filecon=$(ls -Z $line | gawk '{print $1}')
-					if [[ $filecon = "" || $(echo "$filecon" | grep "unlabeled") != "" ]]; then
+					filecon=$(ls -dZ $line | gawk '{print $1}')
+					if [[ $filecon = "" || $(echo "$filecon" | grep "unlabeled\|?") != "" ]]; then
 						filecon="#CONTEXT"
 					fi
 					stat -c "set_metadata(\"/system$line2\", \"uid\", %u, \"gid\", %g, \"mode\", 0%a, \"capabilities\", 0x0, \"selabel\", \"$filecon\");" $line >> $prfiles/root_meta
@@ -4452,8 +4449,8 @@ imgextract() {
 						else
 							caphex="0x0"
 						fi
-						filecon=$(ls -Z $line2 | gawk '{print $1}')
-						if [[ $filecon = "" || $(echo "$filecon" | grep "unlabeled") != "" ]]; then
+						filecon=$(ls -dZ $line2 | gawk '{print $1}')
+						if [[ $filecon = "" || $(echo "$filecon" | grep "unlabeled\|?") != "" ]]; then
 							filecon="#CONTEXT"
 						fi
 						stat -c "set_metadata(\"/$line\", \"uid\", %u, \"gid\", %g, \"mode\", 0%a, \"capabilities\", $caphex, \"selabel\", \"$filecon\");" $line2 >> $prfiles/$set_metadata1
@@ -4466,28 +4463,7 @@ imgextract() {
 	fi
 	extractimg=""
 }
-install_binaries() {
-	cd $base
-	osbit=$(getconf LONG_BIT)
-	banner
-	read -n 1 -p "$t_binary_q"
-	if [[ ! $REPLY = "y" ]]; then
-		exit
-	fi
-	banner
-	echo "$bluet$t_binary_osbit_installing $osbit-bit ...$normal"
-	rm -rf $tools/simg2img
-	rm -rf $tools/make_ext4fs
-	(wget $dlurl/$osbit-bit_binaries.zip 2>&1) >/dev/null
-	$p7z x -y $osbit-bit_binaries.zip 2>&1 >/dev/null
-	rm -rf $osbit-bit_binaries.zip
-	banner
-	echo "$greent$osbit-bit $t_binary_osbit_installed$normal"
-	echo ""
-	read -p "$t_enter_main_menu"
-	exec ./superr
-	return 1
-}
+
 install_cygwin_binaries() {
 	cd $base
 	echo ""
@@ -4828,13 +4804,6 @@ kitchen_update() {
 					echo "$bluet$t_update_updating$normal"
 					echo ""
 					rm -rf $tools/depmet
-					rm -rf $tools/depbuild
-					rm -rf $tools/mkbootimg
-					rm -rf $tools/unpackbootimg
-					rm -rf $tools/boot/mtk-tools/mkbootimg
-					rm -rf $tools/boot/mtk-tools/mkbootimg.exe
-					rm -rf $tools/simg2img
-					rm -rf $tools/make_ext4fs
 					git pull
 					superrv=$(grep "SuperR's Kitchen v" README.md | gawk '{ print $4 }' | sed 's/*//g')
 					currentv=$(echo "$superrv" | cut -d"-" -f1 | cut -d"_" -f1 | sed 's/v//; s/\.//g; s/^0//')
@@ -5321,15 +5290,15 @@ partimg() {
 	echo "$bluet$t_img_create_raw $whatimg.img ...$normal"
 	if [[ $whatimg = "system" ]]; then
 		if [[ -f $romdir/system/default.prop ]]; then
-			( $tools/make_ext4fs${cyg} -T 0$fcontexts -l $syssize -L / -a /$sparseimg ${whatimg}_new.img ${whatimg}/ 2>&1 ) >> $logs/main.log
+			( $make_ext4fs -T 0$fcontexts -l $syssize -L / -a /$sparseimg ${whatimg}_new.img ${whatimg}/ 2>&1 ) >> $logs/main.log
 		else
-			( $tools/make_ext4fs${cyg} -T 0$fcontexts -l $syssize -a $whatimg$sparseimg ${whatimg}_new.img ${whatimg}/ 2>&1 ) >> $logs/main.log
+			( $make_ext4fs -T 0$fcontexts -l $syssize -a $whatimg$sparseimg ${whatimg}_new.img ${whatimg}/ 2>&1 ) >> $logs/main.log
 		fi
 	elif [[ $whatimg = "data" ]]; then
-		( $tools/make_ext4fs${cyg} -T 0$fcontexts -l $datsize -a $whatimg$sparseimg ${whatimg}_new.img ${whatimg}/ 2>&1 ) >> $logs/main.log
+		( $make_ext4fs -T 0$fcontexts -l $datsize -a $whatimg$sparseimg ${whatimg}_new.img ${whatimg}/ 2>&1 ) >> $logs/main.log
 	elif [[ -s $prfiles/exdirsb && $(grep "$whatimg" $prfiles/exdirsb) != "" ]]; then
 		partsize=$(grep "$whatimg" $prfiles/exdirsb | gawk '{print $2}')
-		( $tools/make_ext4fs${cyg} -T 0$fcontexts -l $partsize -a $whatimg$sparseimg ${whatimg}_new.img ${whatimg}/ 2>&1 ) >> $logs/main.log
+		( $make_ext4fs -T 0$fcontexts -l $partsize -a $whatimg$sparseimg ${whatimg}_new.img ${whatimg}/ 2>&1 ) >> $logs/main.log
 	fi
 	sparseimg=""
 	if [[ -d vendor ]]; then
@@ -6422,10 +6391,17 @@ if [[ ! -f $tools/depmet ]]; then
 	touch depmet
 	cd $base
 fi
-if [[ $cyg = "" ]] && [[ ! -x $tools/simg2img || ! -x $tools/make_ext4fs ]]; then
-	install_binaries
-	rm -rf $tools/boot/mtk-tools/mkbootimg
-	cd $base
+if [[ $cyg = "" ]]; then
+	if [[ $(getconf LONG_BIT) = "64" ]]; then
+		make_ext4fs="$tools/make_ext4fs_64"
+		simg2img="$tools/simg2img_64"
+	else
+		make_ext4fs="$tools/make_ext4fs_32"
+		simg2img="$tools/simg2img_32"
+	fi
+else
+	make_ext4fs="$tools/make_ext4fs.exe"
+	simg2img="$tools/simg2img.exe"
 fi
 if [[ $bashwin != "" && ! -f $tools/Imgextractor.exe ]]; then
 	(wget $dlurl/Imgextractor.exe 2>&1) >/dev/null
