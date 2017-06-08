@@ -3476,7 +3476,7 @@ extract_new() {
 			echo "$bluet$t_extract_tar_md5$normal"
 			$p7z e $romzip $mainmd5 $cscmd5 2>/dev/null >> $logs/zip.log
 			banner
-			echo "$t_extract_img"
+			echo "$bluet$t_extract_img$normal"
 			if [[ ! $(tar -tf $mainmd5 | grep system.img.ext4) = "" ]]; then
 				tar -xf $mainmd5 system.img.ext4 boot.img 2>/dev/null >> $logs/zip.log
 				mv system.img.ext4 system.img
@@ -3644,9 +3644,10 @@ extract_new() {
 		romnomd5=$(echo "$rommd5" | rev | cut -d"." -f2- | rev)
 		mv $rommd5 $romnomd5
 		if [[ ! $($p7z l $romnomd5 | grep system.img.ext4) = "" ]]; then
-			echo "$t_extract_img"
-			$p7z x $romnomd5 system.img.ext4 boot.img 2>&1 > $logs/zip.log
+			echo "$bluet$t_extract_img$normal"
+			$p7z x $romnomd5 system.img.ext4 cache.img.ext4 boot.img 2>&1 > $logs/zip.log
 			mv system.img.ext4 system.img
+			mv cache.img.ext4 cache.img
 			rommd5=""
 			romimg="system.img"
 		else
@@ -3718,7 +3719,7 @@ extract_new() {
 							banner
 							echo "$bluet$t_extract_cache$normal"
 							echo ""
-							cscfull=$(find cache -name *csc*.zip)
+							cscfull=$(find cache -name "*.zip")
 							cscdir=$(echo $cscfull | rev | cut -d"/" -f2- | rev)
 							csczip=$(echo $cscfull | rev | cut -d"/" -f1 | rev)
 							cd $cscdir
