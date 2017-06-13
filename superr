@@ -4339,7 +4339,7 @@ imgextract() {
 	banner
 	if [[ ! $cyg = "" || ! $bashwin = "" ]]; then
 		echo "$bluet$t_extract_copy_e ${extractimg} ...$normal"
-		$imgextractor ${extractimg}.img ${extractimg} 2>&1 >/dev/null
+		$imgextractor ${extractimg}.img ${extractimg} 2>&1 >> $logs/main.log
 		gawk '{print $1, $5}' ${extractimg}_statfile.txt | grep ". ." > symtest
 		link1=$(gawk '{print $2}' symtest | sed 's/^/symlink(\"/; s/$/\", /')
 		link2=$(gawk '{print $1}' symtest | sed 's/^/\"\//; s/$/\");/')
@@ -6287,20 +6287,27 @@ if [[ ! $(uname -s | grep "CYGWIN\|cygwin\|Cygwin") = "" ]]; then
 	imgextractor=$tools/Imgextractor.exe
 	p7z=7z
 	aapt=$tools/aapt.exe
-elif [[ $(find /mnt/c -name Windows -maxdepth 1 2>/dev/null | grep -m 1 -o Windows) = "Windows" ]]; then
+elif [[ $(find /mnt/c -name Windows -maxdepth 1 2>/dev/null | grep -m 1 -o Windows) = "Windows" || $(find /c -name Windows -maxdepth 1 2>/dev/null | grep -m 1 -o Windows) = "Windows" ]]; then
+	if [[ $(getconf LONG_BIT) != "64" ]]; then
+		banner
+		echo "${redt}You need a 64-bit OS to run the kitchen in WSL.$normal"
+		echo ""
+		read -p "$t_enter_exit"
+		exit
+	fi
 	rm -rf $tools/dependencies2
 	grep -v "getcap" $tools/dependencies > $tools/dependencies2
-	sed -i '1iadb\n7z\ngit' $tools/dependencies2
+	sed -i '1ip7zip' $tools/dependencies2
 	dependencies="dependencies2"
 	cyg=""
-	script="bat"
+	script="sh"
 	AIK=$tools/boot/AIK
 	bashwin="1"
 	usesudo2="sudo "
-	adb=adb
+	adb=$tools/adb64
 	zipalign=$tools/zipalign
 	imgextractor=$tools/Imgextractor.exe
-	p7z=7z
+	p7z=p7zip
 	aapt="$tools/aapt"
 else
 	cyg=""
@@ -6368,6 +6375,10 @@ if [[ ! -f $tools/depmet ]]; then
 		echo ""
 		if [[ $cyg = "" ]]; then
 			debinstall
+			if [[ $bashwin = "1" ]]; then
+				debpkg="p7zip"
+				debinstall
+			fi
 		else
 			banner
 			read -p "$t_enter_exit"
