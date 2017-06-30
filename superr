@@ -4339,7 +4339,7 @@ imgextract() {
 	banner
 	if [[ ! $cyg = "" || ! $bashwin = "" ]]; then
 		echo "$bluet$t_extract_copy_e ${extractimg} ...$normal"
-		$imgextractor ${extractimg}.img ${extractimg} 2>&1 >> $logs/main.log
+		$imgextractor ${extractimg}.img ${extractimg} 2>&1 >/dev/null
 		gawk '{print $1, $5}' ${extractimg}_statfile.txt | grep ". ." > symtest
 		link1=$(gawk '{print $2}' symtest | sed 's/^/symlink(\"/; s/$/\", /')
 		link2=$(gawk '{print $1}' symtest | sed 's/^/\"\//; s/$/\");/')
@@ -4707,8 +4707,6 @@ isodexstatus() {
 					mmode=" - oat2dex"
 				elif [[ -f $prfiles/deodex_m2 || -f $prfiles/deodex_n2 ]]; then
 					mmode=" - smali/baksmali"
-				elif [[ -f $prfiles/deodex_m3 || -f $prfiles/deodex_n ]]; then
-					mmode=" - oatdump"
 				fi
 			fi
 			odexstatus="Deodexed"
