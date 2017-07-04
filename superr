@@ -3801,13 +3801,21 @@ extract_new() {
 	return 1
 }
 findfstab() {
-	fstmp=$(${usesudo}find ! -type l | grep fstab | grep -v "goldfish\|ranchu\|charger\|zram\|nodata\|\.fwup\|\.fota" | sed 's/\.\///')
+	fstmp=$(${usesudo}find ! -type l | grep fstab | grep -v "goldfish\|ranchu\|charger\|zram\|nodata\|\.fwup\|\.fota\|mofd_v1" | sed 's/\.\///')
 	for i in "$fstmp"; do
 		if [[ $(${usesudo}grep "/system" "$i" | grep -v "^#") != "" ]]; then
 			fstab="$i"
 			break
 		fi
 	done
+	if [[ $fstab = "" ]]; then
+		for i in "$fstmp"; do
+			if [[ $(${usesudo}grep "/data" "$i" | grep -v "^#") != "" ]]; then
+				fstab="$i"
+				break
+			fi
+		done
+	fi
 }
 findimgsize() {
 	cd $romdir
