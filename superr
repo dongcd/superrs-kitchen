@@ -5142,17 +5142,15 @@ partadd() {
 	if [[ ! $partbyname = "" ]]; then
 		if [[ $permtype = "sparse_dat" || $permtype = "raw_img" ]]; then
 			cd $usdir
-			if [[ ! $whatimg = "data" ]]; then
-				gawk 'a=/^mount/{b=1}b&&!a{print "#MOUNT";b=0}1' updater-script > updater-script2
-				mv updater-script2 updater-script
-				sed -i "s/#MOUNT/mount(\"ext4\"\,\ \"EMMC\"\,\ file_getprop\(\"\/tmp\/config\",\ \"byname\"\)\ +\ \"$partbyname\"\ +\ file_getprop\(\"\/tmp\/config\",\ \"slotnum\"\),\ \"\/$whatimg\"\,\ \"\");/" updater-script
-				gawk 'a=/^ifelse\(is_mounted/{b=1}b&&!a{print "#UNMOUNT1";b=0}1' updater-script > updater-script2
-				mv updater-script2 updater-script
-				gawk 'a=/^unmount/{b=1}b&&!a{print "#UNMOUNT2";b=0}1' updater-script > updater-script2
-				mv updater-script2 updater-script
-				sed -i "s/#UNMOUNT1/ifelse(is_mounted(\"\/$whatimg\"),\ unmount(\"\/$whatimg\"));/" updater-script
-				sed -i "s/#UNMOUNT2/unmount(\"\/$whatimg\");/" updater-script
-			fi
+			gawk 'a=/^mount/{b=1}b&&!a{print "#MOUNT";b=0}1' updater-script > updater-script2
+			mv updater-script2 updater-script
+			sed -i "s/#MOUNT/mount(\"ext4\"\,\ \"EMMC\"\,\ file_getprop\(\"\/tmp\/config\",\ \"byname\"\)\ +\ \"$partbyname\"\ +\ file_getprop\(\"\/tmp\/config\",\ \"slotnum\"\),\ \"\/$whatimg\"\,\ \"\");/" updater-script
+			gawk 'a=/^ifelse\(is_mounted/{b=1}b&&!a{print "#UNMOUNT1";b=0}1' updater-script > updater-script2
+			mv updater-script2 updater-script
+			gawk 'a=/^unmount/{b=1}b&&!a{print "#UNMOUNT2";b=0}1' updater-script > updater-script2
+			mv updater-script2 updater-script
+			sed -i "s/#UNMOUNT1/ifelse(is_mounted(\"\/$whatimg\"),\ unmount(\"\/$whatimg\"));/" updater-script
+			sed -i "s/#UNMOUNT2/unmount(\"\/$whatimg\");/" updater-script
 			if [[ -s $prfiles/exdirs && $(grep "$whatimg" $prfiles/exdirs) != "" ]]; then
 				partup=$(echo $whatimg | gawk '{print toupper($0)}')
 				if [[ $permtype = "sparse_dat" ]]; then
@@ -5201,19 +5199,19 @@ partadd() {
 			fi
 		else
 			cd $usdir
+			gawk 'a=/^mount/{b=1}b&&!a{print "#MOUNT";b=0}1' updater-script > updater-script2
+			mv updater-script2 updater-script
+			sed -i "s/#MOUNT/mount(\"ext4\"\,\ \"EMMC\"\,\ file_getprop\(\"\/tmp\/config\",\ \"byname\"\)\ +\ \"$partbyname\"\ +\ file_getprop\(\"\/tmp\/config\",\ \"slotnum\"\),\ \"\/$whatimg\");/" updater-script
+			gawk 'a=/^ifelse\(is_mounted/{b=1}b&&!a{print "#UNMOUNT1";b=0}1' updater-script > updater-script2
+			mv updater-script2 updater-script
+			gawk 'a=/^unmount/{b=1}b&&!a{print "#UNMOUNT2";b=0}1' updater-script > updater-script2
+			mv updater-script2 updater-script
+			sed -i "s/#UNMOUNT1/ifelse(is_mounted(\"\/$whatimg\"),\ unmount(\"\/$whatimg\"));/" updater-script
+			sed -i "s/#UNMOUNT2/unmount(\"\/$whatimg\");/" updater-script
 			if [[ ! $whatimg = "data" ]]; then
 				gawk 'a=/^format/{b=1}b&&!a{print "#FORMAT";b=0}1' updater-script > updater-script2
 				mv updater-script2 updater-script
 				sed -i "s/#FORMAT/format(\"ext4\"\,\ \"EMMC\"\,\ file_getprop\(\"\/tmp\/config\",\ \"byname\"\)\ +\ \"$partbyname\"\ +\ file_getprop\(\"\/tmp\/config\",\ \"slotnum\"\),\ \"0\"\,\ \"\/$whatimg\");/" updater-script
-				gawk 'a=/^mount/{b=1}b&&!a{print "#MOUNT";b=0}1' updater-script > updater-script2
-				mv updater-script2 updater-script
-				sed -i "s/#MOUNT/mount(\"ext4\"\,\ \"EMMC\"\,\ file_getprop\(\"\/tmp\/config\",\ \"byname\"\)\ +\ \"$partbyname\"\ +\ file_getprop\(\"\/tmp\/config\",\ \"slotnum\"\),\ \"\/$whatimg\");/" updater-script
-				gawk 'a=/^ifelse\(is_mounted/{b=1}b&&!a{print "#UNMOUNT1";b=0}1' updater-script > updater-script2
-				mv updater-script2 updater-script
-				gawk 'a=/^unmount/{b=1}b&&!a{print "#UNMOUNT2";b=0}1' updater-script > updater-script2
-				mv updater-script2 updater-script
-				sed -i "s/#UNMOUNT1/ifelse(is_mounted(\"\/$whatimg\"),\ unmount(\"\/$whatimg\"));/" updater-script
-				sed -i "s/#UNMOUNT2/unmount(\"\/$whatimg\");/" updater-script
 			fi
 			if [[ -s $prfiles/exdirs && $(grep "$whatimg" $prfiles/exdirs) != "" ]]; then
 				partup=$(echo $whatimg | gawk '{print toupper($0)}')
