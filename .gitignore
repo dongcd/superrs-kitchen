@@ -5,7 +5,7 @@
 /tools/open_bump.py
 /tools/root/bloat_custom
 /tools/root/root_zips/*
-!/tools/root/root_zips/SuperSU-v2.79-SR3.zip
+!/tools/root/root_zips/SuperSU-v2.82-SR1.zip
 /tools/smali/current/*
 !/tools/smali/current/smali-2.2.1-93a43730.jar
 !/tools/smali/current/baksmali-2.2.1-93a43730.jar
