@@ -3795,7 +3795,7 @@ extract_new() {
 	return 1
 }
 findfstab() {
-	fstmp=$(${usesudo}find -maxdepth 1 ! -type l | grep fstab | grep -v "goldfish\|ranchu\|charger\|zram\|nodata\|\.fwup\|\.fota\|mofd_v1" | sed 's/\.\///')
+	fstmp=$(${usesudo}find -maxdepth 1 ! -type l | grep fstab | grep -v "goldfish\|ranchu\|charger\|zram\|nodata\|\.fwup\|\.fota\|mofd_v1\|\.ftm\." | sed 's/\.\///')
 	for i in "$fstmp"; do
 		if [[ $(${usesudo}grep "/system" "$i" | grep -v "^#") != "" ]]; then
 			fstab="$i"
