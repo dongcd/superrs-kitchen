@@ -2346,7 +2346,7 @@ deodex() {
 	dodeodex() {
 		app=""
 		for app in $(echo "$applist"); do
-			if [[ ! -d $deoappdir/$app/$deoarch ]]; then
+			if [[ ! -d $deoappdir/$app/$deoarch ]] || [[ ! -f $deoappdir/$app/$app.apk ]]; then
 				continue
 			fi
 			if [[ $($p7z l $deoappdir/$app/$app.apk | grep classes.dex) = "" ]]; then
@@ -6383,7 +6383,23 @@ if [[ ! -f $tools/depmet ]]; then
 			exit
 		fi
 	fi
-	if [[ $(which java) = "" || $(java -version 2>&1 | grep "java version\|openjdk version" | cut -d'"' -f2 | cut -c 1,3) -lt "18" ]]; then
+	javabad=""
+	if [[ $(which java) = "" ]]; then
+		javabad="1"
+	fi
+	if [[ $javabad = "" ]]; then
+		javaver=$(java -version 2>&1 | grep "java version\|openjdk version" | cut -d'"' -f2 | cut -c 1,2,3)
+		if [[ $(echo "$javaver" | grep "-") != "" ]]; then
+			if [[ $(echo "$javaver" | sed 's/[^0-9]*//g') -lt "8" ]]; then
+				javabad="1"
+			fi
+		else
+			if [[ $(echo "$javaver" | cut -c 1,3) -lt "18" ]]; then
+				javabad="1"
+			fi
+		fi
+	fi
+	if [[ $javabad = "1" ]]; then
 		debpkg="default-jre"
 		banner
 		echo -e "$t_startup_need_java"
